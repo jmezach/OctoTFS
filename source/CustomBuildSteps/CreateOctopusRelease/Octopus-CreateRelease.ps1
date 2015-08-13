@@ -62,12 +62,16 @@ function Get-LinkedReleaseNotes($vssEndpoint, $comments, $workItems) {
 			$relatedWorkItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_apis/build/builds/$($env:BUILD_BUILDID)/workitems?api-version=2.0"
 			Write-Host "Performing POST request to $relatedWorkItemsUri"
 			$relatedWorkItems = (Invoke-WebRequest -Uri $relatedWorkItemsUri -Method POST -Headers $headers -UseBasicParsing -ContentType "application/json") | ConvertFrom-Json
-			$workItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)/_apis/wit/workItems?ids=$(($relatedWorkItems.value.id) -join '%2C')"
-			Write-Host "Performing GET request to $workItemsUri"
-			$workItemsDetails = (Invoke-WebRequest -Uri $workItemsUri -Headers $headers -UseBasicParsing) | ConvertFrom-Json
 			
-			$workItemEditBaseUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_workitems/edit"
-			$workItemsDetails.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($workItemEditBaseUri/$($_.id)): $($_.fields.'System.Title') [$($_.fields.'System.State')]$nl"}
+			Write-Host "Retrieved $($relatedWorkItems.count) work items"
+			if ($relatedWorkItems.count -gt 0) {
+				$workItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_apis/wit/workItems?ids=$(($relatedWorkItems.value.id) -join '%2C')"
+				Write-Host "Performing GET request to $workItemsUri"
+				$workItemsDetails = (Invoke-WebRequest -Uri $workItemsUri -Headers $headers -UseBasicParsing) | ConvertFrom-Json
+				
+				$workItemEditBaseUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_workitems/edit"
+				$workItemsDetails.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($workItemEditBaseUri/$($_.id)): $($_.fields.'System.Title') [$($_.fields.'System.State')]$nl"}
+			}
 		}
 	}
 	
