@@ -11,8 +11,8 @@
     "author": "Octopus Deploy",
     "version": {
         "Major": 0,
-        "Minor": 2,
-        "Patch": 7
+        "Minor": 3,
+        "Patch": 3
     },
     "minimumAgentVersion": "1.82.0",
 	"groups": [
@@ -43,6 +43,22 @@
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "Octopus Deploy Project Name"
+        },
+        {
+            "name": "Version",
+            "type": "string",
+            "label": "Version",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Version of the release. If empty, the version number is determined by Octopus Deploy."
+        },
+        {
+            "name": "PackageVersion",
+            "type": "string",
+            "label": "Package version",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Version of the packages to use. If empty, the latest version of the packages is used."
         },
 		{
 			"name": "ChangesetCommentReleaseNotes",

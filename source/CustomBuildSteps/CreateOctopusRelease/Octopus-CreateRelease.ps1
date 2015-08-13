@@ -4,6 +4,10 @@
 	[string] [Parameter(Mandatory = $true)]
 	$ProjectName,
 	[string] [Parameter(Mandatory = $false)]
+	$Version,
+	[string] [Parameter(Mandatory = $false)]
+	$PackageVersion,
+	[string] [Parameter(Mandatory = $false)]
 	$ChangesetCommentReleaseNotes,
 	[string] [Parameter(Mandatory = $false)]
 	$WorkItemReleaseNotes,
@@ -147,9 +151,30 @@ if (-not [System.String]::IsNullOrWhiteSpace($DeployTo)) {
 	$deployToParams = "--deployTo=`"$DeployTo`""
 }
 
+#version argument
+if (-not [System.String]::IsNullOrWhiteSpace($Version)) {
+	while ($Version -match "\$\((\w*\.\w*)\)") {
+		$variableValue = Get-TaskVariable -Context $distributedTaskContext -Name $Matches[1]
+		$Version = $Version.Replace($Matches[0], $variableValue)
+		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter $Version"
+	}
+	$versionParams = "--version=$Version"
+}
+
+#packageVersion argument
+if (-not [System.String]::IsNullOrWhiteSpace($PackageVersion))
+{
+	while ($PackageVersion -match "\$\((\w*\.\w*)\)") {
+		$variableValue = Get-TaskVariable -Context $distributedTaskContext -Name $Matches[1]
+		$PackageVersion = $PackageVersion.Replace($Matches[0], $variableValue)
+		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter $PackageVersion"
+	}
+	$packageVersionParams = "--packageversion=$PackageVersion"
+}
+
 # Call Octo.exe
 $octoPath = Get-PathToOctoExe
 Write-Output "Path to Octo.exe = $octoPath"
-Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams $deployToParams $releaseNotesParam $AdditionalArguments"
+Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams $deployToParams $releaseNotesParam $versionParams $packageVersionParams $AdditionalArguments"
 
 Write-Verbose "Finishing Octopus-CreateRelease.ps1"
