@@ -7,6 +7,10 @@
 	$Version,
 	[string] [Parameter(Mandatory = $false)]
 	$PackageVersion,
+	[string] [Parameter(Mandatory = $true)]
+	$Platforms,
+	[string] [Parameter(Mandatory = $true)]
+	$Configurations,
 	[string] [Parameter(Mandatory = $false)]
 	$ChangesetCommentReleaseNotes,
 	[string] [Parameter(Mandatory = $false)]
@@ -134,6 +138,17 @@ function Create-ReleaseNotes($linkedItemReleaseNotes) {
 
 
 ### Execution starts here ###
+
+# Ensure that task should be executed for current configuration/platform combination
+$activeBuildPlatform = $Env:BuildPlatform
+$activeBuildConfiguration = $Env:BuildConfiguration
+$applicableConfigurations = $Configurations.Split(",")
+$applicablePlatforms = $Platforms.Split(",")
+if(($applicableConfigurations -notcontains $activeBuildConfiguration) -or ($applicablePlatforms -notcontains $activeBuildPlatform)) 
+{
+	Write-Host ("`tThe platform/configuration settings for which to create releases don't match this build ({0}, {1}). Exiting." -f $activeBuildConfiguration, $activeBuildPlatform)
+	Exit 0
+}
 
 # Get required parameters
 $connectedServiceDetails = Get-ServiceEndpoint -Name "$ConnectedServiceName" -Context $distributedTaskContext 

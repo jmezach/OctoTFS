@@ -11,8 +11,8 @@
     "author": "Octopus Deploy",
     "version": {
         "Major": 0,
-        "Minor": 3,
-        "Patch": 4
+        "Minor": 4,
+        "Patch": 0
     },
     "minimumAgentVersion": "1.82.0",
 	"groups": [
@@ -59,6 +59,22 @@
             "defaultValue": "",
             "required": false,
             "helpMarkDown": "Version of the packages to use. If empty, the latest version of the packages is used."
+        },
+        {
+            "name": "Platforms",
+            "type": "string",
+            "label": "Platform(s)",
+            "defaultValue": "Any CPU",
+            "required": true,
+            "helpMarkDown": "Comma-seperated list of platforms for which to create a release. This task will only run for builds with one of these platforms."
+        },
+        {
+            "name": "Configurations",
+            "type": "string",
+            "label": "Configuration(s)",
+            "defaultValue": "Release",
+            "required": true,
+            "helpMarkDown": "Comma-seperated list of configurations for which to create a release. This task will only run for builds with one of these configurations."
         },
 		{
 			"name": "ChangesetCommentReleaseNotes",
