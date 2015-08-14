@@ -124,8 +124,9 @@ function Create-ReleaseNotes($linkedItemReleaseNotes) {
 	$buildUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$projectName/_BuildvNext#_a=summary&buildId=$buildId"
 	$buildName = $env:BUILD_DEFINITIONNAME	#works
 	$repoName = $env:BUILD_REPOSITORY_NAME	#works
+	$branchName = $env:BUILD_SOURCEBRANCH
 	#$repoUri = $env:BUILD_REPOSITORY_URI #nope :(
-	$notes = "Release created by Build [${buildName} #${buildNumber}](${buildUri}) in Project ${projectName} from the ${repoName} repository."
+	$notes = "Release created by Build [${buildName} #${buildNumber}](${buildUri}) in Project ${projectName} from the ${repoName} repository (${branchName} branch)."
 	if (-not [System.String]::IsNullOrWhiteSpace($linkedItemReleaseNotes)) {
 		$notes += "`r`n`r`n$linkedItemReleaseNotes"
 	}
