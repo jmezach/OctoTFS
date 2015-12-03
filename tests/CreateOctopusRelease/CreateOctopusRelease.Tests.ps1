@@ -227,8 +227,9 @@ Describe "Create Octopus Release" {
 				Assert-VerifiableMocks
 			}
 			It "writes a build summary file" {
-				$buildSummaryFile = Get-ChildItem -Path TestDrive:\ -Filter "build-summary*.md"
-				$buildSummaryFile.FullName | Should Contain "Octopus Deploy Release"
+				$buildSummaryFile = Get-ChildItem -Path TestDrive:\ -Filter "Octopus Deploy.md"
+				Copy-Item $buildSummaryFile.FullName $PSScriptRoot
+				$buildSummaryFile.FullName | Should Contain "Octopus Deploy"
 				$buildSummaryFile.FullName | Should Contain "Company.Product.Project"
 				$buildSummaryFile.FullName | Should Contain "1.0.0"
 				$buildSummaryFile.FullName | Should ContainExactly "http://dummyoctopusurl/app#/projects/company.product.project/releases/1.0.0"
