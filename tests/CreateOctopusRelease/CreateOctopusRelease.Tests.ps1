@@ -17,6 +17,8 @@ Describe "Create Octopus Release" {
 		$env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI = "http://dummtfsurl/dummytpc/"
 		$env:SYSTEM_TEAMPROJECTID = "dummytpid"
 		$env:BUILD_BUILDID = "611"
+		$env:BuildPlatform = "Any CPU"
+		$env:BuildConfiguration = "Release"
 		
 		# Setup a Mock for retrieving the Octopus Deploy service endpoint 
 		Mock Get-ServiceEndpoint -Verifiable -ParameterFilter { $Name -eq "Octopus Deploy Server" } {
@@ -31,7 +33,7 @@ Describe "Create Octopus Release" {
 		}
 		
 		# Setup a Mock for retrieving the VSO/TFS service endpoint
-		Mock Get-ServiceEndpoint -Verifiable -ParameterFilter { $Name -eq "SystemVssConnection" } {
+		Mock Get-ServiceEndpoint -ParameterFilter { $Name -eq "SystemVssConnection" } {
 				return [PSCustomObject]@{
 					"Url"="http://dummtfsurl";
 					"Authorization"=[PSCustomObject]@{
