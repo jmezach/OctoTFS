@@ -152,7 +152,7 @@ Describe "Create Octopus Release" {
 				Assert-VerifiableMocks
 			}
 			It "writes the changeset comments into the release notes file" {
-				$releaseNotesFile = Get-ChildItem -Path TestDrive:\ -Filter *.md
+				$releaseNotesFile = Get-ChildItem -Path TestDrive:\ -Filter "release*.md"
 				$releaseNotesFile.FullName | Should Contain "Changeset Comments:"
 				$releaseNotesFile.FullName | Should Contain "My changeset"
 				$releaseNotesFile.FullName | Should Contain "John Doe"
@@ -177,7 +177,7 @@ Describe "Create Octopus Release" {
 				Assert-VerifiableMocks
 			}
 			It "writes the changeset comments into the release notes file" {
-				$releaseNotesFile = Get-ChildItem -Path TestDrive:\ -Filter *.md
+				$releaseNotesFile = Get-ChildItem -Path TestDrive:\ -Filter "release*.md"
 				$releaseNotesFile.FullName | Should Contain "Commit Messages:"
 				$releaseNotesFile.FullName | Should Contain "My commit"
 				$releaseNotesFile.FullName | Should Contain "John Doe"
@@ -203,11 +203,35 @@ Describe "Create Octopus Release" {
 				Assert-VerifiableMocks
 			}
 			It "writes the changeset comments into the release notes file" {
-				$releaseNotesFile = Get-ChildItem -Path TestDrive:\ -Filter *.md
+				$releaseNotesFile = Get-ChildItem -Path TestDrive:\ -Filter "release*.md"
 				$releaseNotesFile.FullName | Should Contain "Work Items:"
 				$releaseNotesFile.FullName | Should Contain "[1]"
 				$releaseNotesFile.FullName | Should Contain "Done"
 				$releaseNotesFile.FullName | Should Contain "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_workitems/edit/1"
+			}
+		}
+		
+		Context "Explicit version" {
+			# Arrange
+			Mock Invoke-Tool -Verifiable -ParameterFilter {
+				$Path -eq $octoExe.FullName -and
+				$Arguments -like "*--project=`"Company.Product.Project`"*" -and
+				$Arguments -like "*--version=1.0.0*"
+			}
+			
+			# Act
+			Invoke-BuildTask -TaskDefinitionFile $sut -- -ConnectedServiceName "Octopus Deploy Server" -ProjectName "Company.Product.Project" -Version 1.0.0
+			
+			# Assert
+			It "invokes Octo.exe with a project and version" {
+				Assert-VerifiableMocks
+			}
+			It "writes a build summary file" {
+				$buildSummaryFile = Get-ChildItem -Path TestDrive:\ -Filter "build-summary*.md"
+				$buildSummaryFile.FullName | Should Contain "Octopus Deploy Release"
+				$buildSummaryFile.FullName | Should Contain "Company.Product.Project"
+				$buildSummaryFile.FullName | Should Contain "1.0.0"
+				$buildSummaryFile.FullName | Should ContainExactly "http://dummyoctopusurl/app#/projects/company.product.project/releases/1.0.0"
 			}
 		}
 	}

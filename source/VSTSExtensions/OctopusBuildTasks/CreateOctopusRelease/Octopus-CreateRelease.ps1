@@ -208,4 +208,16 @@ $octoPath = Get-PathToOctoExe
 Write-Output "Path to Octo.exe = $octoPath"
 Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams $deployToParams $releaseNotesParam $versionParams $packageVersionParams $AdditionalArguments"
 
+# If a version was specified
+if (-not [System.String]::IsNullOrWhiteSpace($Version)) {
+	# Add a summary report to the build details with a link to the release
+	$nl = "`r`n`r`n"
+	$summaryguid = [guid]::NewGuid()
+	$summaryFileLocation = Join-Path -Path $env:BUILD_STAGINGDIRECTORY -ChildPath "build-summary-$summaryguid.md"
+	$summary = "#Octopus Deploy Release $ProjectName ($Version) created#$nl"
+	$summary += "Click [here]($octopusUrl/app#/projects/$($ProjectName.Replace(".", "-").ToLowerInvariant())/releases/$Version) to view the release in Octopus Deploy"
+	$summary | Out-File $summaryFileLocation -Encoding utf8
+	Write-Output "##vso[build.uploadsummary]$summaryFileLocation"
+}
+
 Write-Verbose "Finishing Octopus-CreateRelease.ps1"
