@@ -1,9 +1,9 @@
 Team Build Preview Custom Steps
 ===============================
 
-Custom Build Steps for [Team Build vNext](http://vsalmdocs.azurewebsites.net/library/vs/alm/build/overview)
+Custom Build Steps for [Team Build vNext](http://aka.ms/tfbuild)
 
-These need to be uploaded to your Visual Studio or TFS instance before they can be used. This page will be updated when there's a way to do that!
+These need to be uploaded to your Visual Studio or TFS instance before they can be used. To upload this custom task, use the `tfs-cli` tool available from [https://www.npmjs.com/package/tfx-cli](https://github.com/Microsoft/tfs-cli).
 
 *Note: You can still use [OctoPack](http://docs.octopusdeploy.com/display/OD/Using+OctoPack) as part of your MSBuild task to package and push Nuget packages.*
 
@@ -11,23 +11,11 @@ These need to be uploaded to your Visual Studio or TFS instance before they can 
 ----------------------
 Creates a new Release in Octopus Deploy.
 
-### Instructions for use:
+### Instructions for use
 
-1. Upload the `CreateOctopusRelease` custom build task (*Note: not currently available)*
+Detailed installation instructions can be found at [http://docs.octopusdeploy.com/display/OD/Use+the+Team+Foundation+Build+Custom+Task](http://docs.octopusdeploy.com/display/OD/Use+the+Team+Foundation+Build+Custom+Task)
 
-2. Add a Generic *Connected Service* in the Administration page for your Team Project.
-
- ![Octopus Connected Service](../../img/tfsbuild-connectedservice1.png)
- 
- ![Octopus Connected Service](../../img/tfsbuild-connectedservice2.png)
- 
- *Note: Currently, you should just put an [API key](http://docs.octopusdeploy.com/display/OD/How+to+create+an+API+key) in the password field. We'll add user/pass soon and work out which one you're using.*
- 
-3. Add the *Create Octopus Release* custom build step to your build definition.
-
- ![Add Custom Build Step](../../img/tfsbuild-addbuildstep.png)
- 
-4. Configure the custom build step.
+There are a number of configuration options available.
 
  ![Configure Custom Build Step](../../img/tfsbuild-configurebuildstep.png)
  
@@ -45,4 +33,3 @@ The *Release Notes* options, if selected, will result in nicely formatted releas
 
 ![Release Notes in Octopus Deploy Release](../../img/tfsbuild-releasenotes.png)
 
-*Note: Currently only working for TFVC repositories. Git repositories coming soon*

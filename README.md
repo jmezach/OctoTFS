@@ -6,7 +6,7 @@ OctoTFS is a repository containing components for integration with Team Foundati
 Team Build Preview Custom Steps
 -------------------------------
 
-Custom Build Steps for [Team Build vNext](http://vsalmdocs.azurewebsites.net/library/vs/alm/build/overview)
+Custom Build Steps for [Team Build vNext](http://aka.ms/tfbuild)
 
 For usage, see the Build Steps [Readme](source/CustomBuildSteps)
 
@@ -16,7 +16,7 @@ For usage, see the Build Steps [Readme](source/CustomBuildSteps)
 Build PowerShell Scripts
 ------------------------
 
-PowerShell Scripts that can be used independently or with [Team Build vNext](http://vsalmdocs.azurewebsites.net/library/vs/alm/build/overview)
+PowerShell Scripts that can be used independently or with [Team Build vNext](http://aka.ms/tfbuild)
 
 For usage, see the PowerShell Scripts [Readme](source/BuildPowershellScripts)
 

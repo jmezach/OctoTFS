@@ -79,7 +79,7 @@
 		{
 			"name": "ChangesetCommentReleaseNotes",
 			"type": "boolean",
-			"label": "Include Changeset comments",
+			"label": "Include Changeset Comments",
 			"defaultValue": "false",
 			"required": false,
 			"helpMarkDown": "Whether to include linked Changeset comments in Octopus Release notes",
@@ -92,6 +92,15 @@
 			"defaultValue": "false",
 			"required": false,
 			"helpMarkDown": "Whether to include linked Work Item Titles in Octopus Release notes",
+			"groupName": "releasenotes"
+		},
+		{
+			"name": "CustomReleaseNotes",
+			"type": "string",
+			"label": "Custom Notes",
+			"defaultValue": "",
+			"required": false,
+			"helpMarkDown": "Custom notes appended to Octopus Release notes",
 			"groupName": "releasenotes"
 		},
 		{

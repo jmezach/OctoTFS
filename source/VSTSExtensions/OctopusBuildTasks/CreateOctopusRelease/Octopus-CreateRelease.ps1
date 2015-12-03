@@ -16,35 +16,37 @@
 	[string] [Parameter(Mandatory = $false)]
 	$WorkItemReleaseNotes,
 	[string] [Parameter(Mandatory = $false)]
+	$CustomReleaseNotes,
+	[string] [Parameter(Mandatory = $false)]
 	$DeployTo,
 	[string] [Parameter(Mandatory = $false)]
 	$AdditionalArguments
 )
 
-#todo:
-#  - handle non-TFVC repositories
-
 Write-Verbose "Entering script Octopus-CreateRelease.ps1"
 Import-Module "Microsoft.TeamFoundation.DistributedTask.Task.Common"
 
-
 # Get release notes from linked changesets and work items
 function Get-LinkedReleaseNotes($vssEndpoint, $comments, $workItems) {
+
+    Write-Host "Environment = $env:BUILD_REPOSITORY_PROVIDER"
+	Write-Host "Comments = $comments, WorkItems = $workItems"
 	$personalAccessToken = $vssEndpoint.Authorization.Parameters.AccessToken
 	
 	$changesUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_apis/build/builds/$($env:BUILD_BUILDID)/changes"
 	$headers = @{Authorization = "Bearer $personalAccessToken"}
-	$relatedChanges = (Invoke-WebRequest -Uri $changesUri -Headers $headers -UseBasicParsing) | ConvertFrom-Json
-	Write-Host "Related Changes = $relatedChanges"
+	$changesResponse = Invoke-WebRequest -Uri $changesUri -Headers $headers -UseBasicParsing
+	$relatedChanges = $changesResponse.Content | ConvertFrom-Json
+	Write-Host "Related Changes = $($relatedChanges.value)"
 	
 	$releaseNotes = ""
 	$nl = "`r`n`r`n"
 	if ($comments -eq $true) {
-		if ($env:BUILD_REPOSITORY_PROVIDER -eq "Tfvc") {
+		if ($env:BUILD_REPOSITORY_PROVIDER -eq "TfsVersionControl") {
 			Write-Host "Adding changeset comments to release notes"
 			$releaseNotes += "**Changeset Comments:**$nl"
 			$relatedChanges.value | ForEach-Object {$releaseNotes += "* [$($_.id) - $($_.author.displayName)]($(ChangesetUrl $_.location)): $($_.message)$nl"}
-		} elseif ($env:BUILD_REPOSITORY_PROVIDER -eq "TfsGit") {
+		} else {
 			Write-Host "Adding commit messages to release notes"
 			$releaseNotes += "**Commit Messages:**$nl"
 			$relatedChanges.value | ForEach-Object {$releaseNotes += "* [$($_.id) - $($_.author.displayName)]($(CommitUrl $_)): $($_.message)$nl"}
@@ -54,32 +56,35 @@ function Get-LinkedReleaseNotes($vssEndpoint, $comments, $workItems) {
 	if ($workItems -eq $true) {
 		Write-Host "Adding work items to release notes"
 		$releaseNotes += "**Work Items:**$nl"
-		if ($env:BUILD_REPOSITORY_PROVIDER -eq "Tfvc") {
-			foreach ($c in $relatedChanges.value) {
-				# work item id is a hack because id is prefixed with "C", and I'm not 100% sure it's consistent.
-				$wiId = $c.location.Substring($c.location.LastIndexOf("/")+1)
-				$wiUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)/_apis/tfvc/changesets/$wiId/workItems"
-				$wi = (Invoke-WebRequest -Uri $wiUri -Headers $headers -UseBasicParsing) | ConvertFrom-Json
-				$wi.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($($_.webUrl)): $($_.title) [$($_.state)]$nl"}
-			}
-		} elseif ($env:BUILD_REPOSITORY_PROVIDER -eq "TfsGit") {
-			$relatedWorkItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_apis/build/builds/$($env:BUILD_BUILDID)/workitems?api-version=2.0"
-			Write-Host "Performing POST request to $relatedWorkItemsUri"
-			$relatedWorkItems = (Invoke-WebRequest -Uri $relatedWorkItemsUri -Method POST -Headers $headers -UseBasicParsing -ContentType "application/json") | ConvertFrom-Json
-			
-			Write-Host "Retrieved $($relatedWorkItems.count) work items"
-			if ($relatedWorkItems.count -gt 0) {
-				$workItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)/_apis/wit/workItems?ids=$(($relatedWorkItems.value.id) -join '%2C')"
-				Write-Host "Performing GET request to $workItemsUri"
-				$workItemsDetails = (Invoke-WebRequest -Uri $workItemsUri -Headers $headers -UseBasicParsing) | ConvertFrom-Json
-				
-				$workItemEditBaseUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_workitems/edit"
-				$workItemsDetails.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($workItemEditBaseUri/$($_.id)): $($_.fields.'System.Title') [$($_.fields.'System.State')]$nl"}
-			}
+
+		$relatedWorkItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_apis/build/builds/$($env:BUILD_BUILDID)/workitems?api-version=2.0"
+		Write-Host "Performing POST request to $relatedWorkItemsUri"
+		$relatedWiResponse = Invoke-WebRequest -Uri $relatedWorkItemsUri -Method POST -Headers $headers -UseBasicParsing -ContentType "application/json"
+		$relatedWorkItems = $relatedWiResponse.Content | ConvertFrom-Json
+		
+		Write-Host "Retrieved $($relatedWorkItems.count) work items"
+		if ($relatedWorkItems.count -gt 0) {
+			$workItemsUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)/_apis/wit/workItems?ids=$(($relatedWorkItems.value.id) -join '%2C')"
+			Write-Host "Performing GET request to $workItemsUri"
+			$relatedWiDetailsResponse = Invoke-WebRequest -Uri $workItemsUri -Headers $headers -UseBasicParsing
+			$workItemsDetails = $relatedWiDetailsResponse.Content | ConvertFrom-Json
+		
+			$workItemEditBaseUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_workitems/edit"
+			$workItemsDetails.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($workItemEditBaseUri/$($_.id)): $($_.fields.'System.Title') [$($_.fields.'System.State')] $(GetWorkItemTags($_.fields)) $nl"}
 		}
 	}
-	
+	Write-Host "Release Notes:`r`n$releaseNotes"
 	return $releaseNotes
+}
+function GetWorkItemTags($workItemFields)
+{    
+    $tagHtml = ""
+    if($workItemFields -ne $null -and $workItemFields.'System.Tags' -ne $null )
+    {        
+        $workItemFields.'System.Tags'.Split(';') | ForEach-Object {$tagHtml += "<span class='label label-info'>$($_)</span>"}
+    }
+   
+    return $tagHtml
 }
 function ChangesetUrl($apiUrl) {
 	$wiId = $apiUrl.Substring($apiUrl.LastIndexOf("/")+1)
@@ -130,9 +135,15 @@ function Create-ReleaseNotes($linkedItemReleaseNotes) {
 	if (-not [System.String]::IsNullOrWhiteSpace($linkedItemReleaseNotes)) {
 		$notes += "`r`n`r`n$linkedItemReleaseNotes"
 	}
+	
+	if(-not [System.String]::IsNullOrWhiteSpace($CustomReleaseNotes)) {
+		$notes += "`r`n`r`n**Custom Notes:**"
+		$notes += "`r`n`r`n$CustomReleaseNotes"
+	}
+	
 	$fileguid = [guid]::NewGuid()
 	$fileLocation = Join-Path -Path $env:BUILD_STAGINGDIRECTORY -ChildPath "release-notes-$fileguid.md"
-	$notes | Out-File $fileLocation
+	$notes | Out-File $fileLocation -Encoding utf8
 	
 	return "--releaseNotesFile=`"$fileLocation`""
 }
@@ -158,8 +169,8 @@ $octopusUrl = $connectedServiceDetails.Url
 
 # Get release notes
 $linkedReleaseNotes = ""
-$wiReleaseNotes = Convert-String $WorkItemReleaseNotes Boolean
-$commentReleaseNotes = Convert-String $ChangesetCommentReleaseNotes Boolean
+$wiReleaseNotes = [System.Convert]::ToBoolean($WorkItemReleaseNotes)
+$commentReleaseNotes = [System.Convert]::ToBoolean($ChangesetCommentReleaseNotes)
 if ($wiReleaseNotes -or $commentReleaseNotes) {
 	$vssEndPoint = Get-ServiceEndPoint -Name "SystemVssConnection" -Context $distributedTaskContext
 	$linkedReleaseNotes = Get-LinkedReleaseNotes $vssEndPoint $commentReleaseNotes $wiReleaseNotes

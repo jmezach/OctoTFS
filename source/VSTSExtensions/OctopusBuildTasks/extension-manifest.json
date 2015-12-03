@@ -1,0 +1,78 @@
+{
+    "manifestVersion": 1,
+    "id": "octopus-deploy-build-release-tasks",
+    "name": "Octopus Deploy Build and Release Tasks",
+    "version": "0.5.5",
+    "publisher": "octopusdeploy",
+    "description": "Build and Release tasks for integrating with Octopus Deploy",
+    "public": true,
+    "categories": [
+        "Build and release"
+    ],
+    "tags": [
+        "octopus", "octopus deploy", "deploy"
+    ],
+    "icons": {
+        "default": "extension-icon.png"
+    },
+    "screenshots": [
+        {
+            "path": "img/tfsbuild-addbuildstep.png"
+        },
+        {
+            "path": "img/tfsbuild-configurebuildstep.png"
+        },
+        {
+            "path": "img/tfsbuild-releasenotes.png"
+        }
+    ],
+    "content": {
+        "details":
+        {
+            "path": "createoctopusrelease.md"
+        }
+    },
+    "links": {
+        "home": {
+            "uri": "https://octopus.com"
+        },
+        "getstarted": {
+            "uri": "http://docs.octopusdeploy.com/display/OD/Use+the+Team+Foundation+Build+Custom+Task"
+        },
+        "support": {
+            "uri": "https://octopus.com/support"
+        },
+        "repository": {
+            "uri": "https://github.com/OctopusDeploy/OctoTFS"
+        }
+    },
+    "branding": {
+        "color": "#eee",
+        "theme": "light"
+    },
+    "files": [
+        {
+            "path": "CreateOctopusRelease"
+        },
+        {
+            "path": "img",
+            "addressable": true
+        }
+    ],
+    "scopes": [
+        "vso.build",
+        "vso.build_execute"
+    ],
+    "contributions": [
+        {
+            "id": "octopus-create-release",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "CreateOctopusRelease"
+            }
+        }
+    ]
+}
