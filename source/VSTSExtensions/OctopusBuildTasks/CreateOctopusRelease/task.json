@@ -44,7 +44,7 @@
             "required": true,
             "helpMarkDown": "Octopus Deploy Project Name"
         },
-        {
+		{
             "name": "Version",
             "type": "string",
             "label": "Version",

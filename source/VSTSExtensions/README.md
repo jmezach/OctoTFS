@@ -7,7 +7,7 @@ These need to be uploaded to your Visual Studio or TFS instance before they can 
 
 *Note: You can still use [OctoPack](http://docs.octopusdeploy.com/display/OD/Using+OctoPack) as part of your MSBuild task to package and push Nuget packages.*
 
-[Create Octopus Release](CreateOctopusRelease)
+[Create Octopus Release](OctopusBuildTasks/CreateOctopusRelease)
 ----------------------
 Creates a new Release in Octopus Deploy.
 

@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "octopus-deploy-build-release-tasks",
     "name": "Octopus Deploy Build and Release Tasks",
-    "version": "0.5.5",
+    "version": "0.5.4",
     "publisher": "octopusdeploy",
     "description": "Build and Release tasks for integrating with Octopus Deploy",
     "public": true,

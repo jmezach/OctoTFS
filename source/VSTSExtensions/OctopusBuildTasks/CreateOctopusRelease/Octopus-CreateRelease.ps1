@@ -70,11 +70,14 @@ function Get-LinkedReleaseNotes($vssEndpoint, $comments, $workItems) {
 			$workItemsDetails = $relatedWiDetailsResponse.Content | ConvertFrom-Json
 		
 			$workItemEditBaseUri = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$($env:SYSTEM_TEAMPROJECTID)/_workitems/edit"
-			$workItemsDetails.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($workItemEditBaseUri/$($_.id)): $($_.fields.'System.Title') [$($_.fields.'System.State')] $(GetWorkItemTags($_.fields)) $nl"}
+			$workItemsDetails.value | ForEach-Object {$releaseNotes += "* [$($_.id)]($workItemEditBaseUri/$($_.id)): $($_.fields.'System.Title') $(GetWorkItemState($_.fields)) $(GetWorkItemTags($_.fields)) $nl"}
 		}
 	}
 	Write-Host "Release Notes:`r`n$releaseNotes"
 	return $releaseNotes
+}
+function GetWorkItemState($workItemFields) {
+    return "<span class='label'>$($workItemFields.'System.State')</span>"
 }
 function GetWorkItemTags($workItemFields)
 {    
