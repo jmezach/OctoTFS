@@ -228,7 +228,6 @@ Describe "Create Octopus Release" {
 			}
 			It "writes a build summary file" {
 				$buildSummaryFile = Get-ChildItem -Path TestDrive:\ -Filter "Octopus Deploy.md"
-				Copy-Item $buildSummaryFile.FullName $PSScriptRoot
 				$buildSummaryFile.FullName | Should Contain "Octopus Deploy"
 				$buildSummaryFile.FullName | Should Contain "Company.Product.Project"
 				$buildSummaryFile.FullName | Should Contain "1.0.0"
