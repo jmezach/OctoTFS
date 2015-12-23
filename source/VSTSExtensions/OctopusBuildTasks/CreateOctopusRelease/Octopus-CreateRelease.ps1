@@ -7,6 +7,8 @@
 	$Version,
 	[string] [Parameter(Mandatory = $false)]
 	$PackageVersion,
+    [string] [Parameter(Mandatory = $false)]
+    $Channel,
 	[string] [Parameter(Mandatory = $true)]
 	$Platforms,
 	[string] [Parameter(Mandatory = $true)]
@@ -190,7 +192,7 @@ if (-not [System.String]::IsNullOrWhiteSpace($Version)) {
 	while ($Version -match "\$\((\w*\.\w*)\)") {
 		$variableValue = Get-TaskVariable -Context $distributedTaskContext -Name $Matches[1]
 		$Version = $Version.Replace($Matches[0], $variableValue)
-		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter $Version"
+		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter Version"
 	}
 	$versionParams = "--version=$Version"
 }
@@ -201,15 +203,27 @@ if (-not [System.String]::IsNullOrWhiteSpace($PackageVersion))
 	while ($PackageVersion -match "\$\((\w*\.\w*)\)") {
 		$variableValue = Get-TaskVariable -Context $distributedTaskContext -Name $Matches[1]
 		$PackageVersion = $PackageVersion.Replace($Matches[0], $variableValue)
-		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter $PackageVersion"
+		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter PackageVersion"
 	}
 	$packageVersionParams = "--packageversion=$PackageVersion"
+}
+
+#channel argument
+Write-Verbose $Channel
+if (-not [System.String]::IsNullOrWhiteSpace($Channel))
+{
+    while ($Channel -match "\$\((\w*\.\w*)\)") {
+		$variableValue = Get-TaskVariable -Context $distributedTaskContext -Name $Matches[1]
+		$Channel = $Channel.Replace($Matches[0], $variableValue)
+		Write-Verbose "Substituting variable $($Matches[0]) with value $variableValue for parameter Channel"
+	}
+    $channelParams = "--channel=$Channel"
 }
 
 # Call Octo.exe
 $octoPath = Get-PathToOctoExe
 Write-Output "Path to Octo.exe = $octoPath"
-Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams $deployToParams $releaseNotesParam $versionParams $packageVersionParams $AdditionalArguments"
+Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams $deployToParams $releaseNotesParam $versionParams $packageVersionParams $channelParams $AdditionalArguments"
 
 # If a version was specified
 if (-not [System.String]::IsNullOrWhiteSpace($Version)) {

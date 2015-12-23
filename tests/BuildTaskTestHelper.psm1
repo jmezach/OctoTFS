@@ -24,20 +24,20 @@ function Invoke-BuildTask {
 	foreach ($input in $taskDefinition.inputs) {
 		$argumentName = "-$($input.name)"
 		if ($Parameters -contains $argumentName) {
-			Write-Verbose "Adding passed argument $argumentName"
-			$buildTaskArguments[$argumentName] = "`"$($argumentHash[$argumentName])`""
+			Write-Verbose "Adding passed argument $argumentName ($($argumentHash[$argumentName]))"
+			$buildTaskArguments[$argumentName] = "`'$($argumentHash[$argumentName])`'"
 		} elseif ($input.type -eq "boolean") {
 			Write-Verbose "Adding default value for boolean argument $argumentName"
-			$buildTaskArguments[$argumentName] = "`"$($input.defaultValue)`""
+			$buildTaskArguments[$argumentName] = "`'$($input.defaultValue)`'"
 		} elseif ($input.defaultValue) {
 			Write-Verbose "Adding default value for argument $argumentName"
-			$buildTaskArguments[$argumentName] = "`"$($input.defaultValue)`""
+			$buildTaskArguments[$argumentName] = "`'$($input.defaultValue)`'"
 		}
 	}
 
 	# Compile the argument list
 	$argumentList = @()
-	$buildTaskArguments.Keys | % { $argumentList += ("$($_)", $buildTaskArguments.Item($_)) }
+	$buildTaskArguments.Keys | % { $argumentList += ("$($_)", $($buildTaskArguments.Item($_))) }
 	
 	# Invoke the task
 	Invoke-Expression "& `"$scriptToExecute`" $argumentList"

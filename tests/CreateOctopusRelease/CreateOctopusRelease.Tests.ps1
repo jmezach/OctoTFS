@@ -11,6 +11,7 @@ Describe "Create Octopus Release" {
 		# Dummy function definitions so we can mock these
 		Function Get-ServiceEndpoint { param($Name, $Context) }
 		Function Invoke-Tool { param($Path, $Arguments) }
+        Function Get-TaskVariable { param($Context, $Name) }
 		
 		# Set-up TFS variables
 		$env:BUILD_STAGINGDIRECTORY = "TestDrive:\"
@@ -234,5 +235,41 @@ Describe "Create Octopus Release" {
 				$buildSummaryFile.FullName | Should ContainExactly "http://dummyoctopusurl/app#/projects/company.product.project/releases/1.0.0"
 			}
 		}
+        
+        Context "Channel support" {
+            # Arrange
+            Mock Invoke-Tool -Verifiable -ParameterFilter {
+                $Path -eq $octoExe.FullName -and
+                $Arguments -like "*--project=`"Company.Product.Project`"*" -and
+                $Arguments -like "*--channel=MyChannel*"
+            }
+            
+            # Act
+            Invoke-BuildTask -TaskDefinitionFile $sut -- -ConnectedServiceName "Octopus Deploy Server" -ProjectName "Company.Product.Project" -Channel "MyChannel"
+            
+            # Assert
+            It "invokes Octo.exe with a project and channel" {
+                Assert-VerifiableMocks
+            }
+        }
+        
+        Context "Channel parameter supports variables" {
+            # Arrange
+            Mock Get-TaskVariable -Verifiable -ParameterFilter { $Name -eq "Version.AssemblyVersion" } { "1.0.0" }
+            Mock Get-TaskVariable -Verifiable -ParameterFilter { $Name -eq "Version.Stability" } { "alpha" }
+            Mock Invoke-Tool -Verifiable -ParameterFilter {
+                $Path -eq $octoExe.FullName -and
+                $Arguments -like "*--project=`"Company.Product.Project`"*" -and
+                $Arguments -like "*--channel=1.0.0-alpha*"
+            }
+            
+            # Act
+            Invoke-BuildTask -TaskDefinitionFile $sut -- -ConnectedServiceName "Octopus Deploy Server" -ProjectName "Company.Product.Project" -Channel '$(Version.AssemblyVersion)-$(Version.Stability)'
+            
+            # Assert
+            It "invokes Octo.exe with a project and channel" {
+                Assert-VerifiableMocks
+            }
+        }
 	}
 }
