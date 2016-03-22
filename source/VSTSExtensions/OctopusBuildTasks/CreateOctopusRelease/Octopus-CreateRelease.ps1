@@ -153,7 +153,6 @@ function Create-ReleaseNotes($linkedItemReleaseNotes) {
 	return "--releaseNotesFile=`"$fileLocation`""
 }
 
-
 ### Execution starts here ###
 
 # Ensure that task should be executed for current configuration/platform combination
@@ -223,7 +222,7 @@ if (-not [System.String]::IsNullOrWhiteSpace($Channel))
 # Call Octo.exe
 $octoPath = Get-PathToOctoExe
 Write-Output "Path to Octo.exe = $octoPath"
-Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams $deployToParams $releaseNotesParam $versionParams $packageVersionParams $channelParams $AdditionalArguments"
+Invoke-Tool -Path $octoPath -Arguments "create-release --project=`"$ProjectName`" --server=$octopusUrl $credentialParams --enableServiceMessages $deployToParams $releaseNotesParam $versionParams $packageVersionParams $channelParams $AdditionalArguments"
 
 # If a version was specified
 if (-not [System.String]::IsNullOrWhiteSpace($Version)) {

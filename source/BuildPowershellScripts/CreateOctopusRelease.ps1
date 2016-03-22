@@ -62,9 +62,9 @@ function Get-SelectedPackages($deploymentTemplate, $packageVersions) {
 		} else {
 			Write-Verbose "  Step '$($thisStep.StepName)' will use specified version $($matching.Version)"
 		}
-		
-		return $packageVersions
 	}
+	
+	return $packageVersions
 }
 
 ### Execution Starts Here ###
