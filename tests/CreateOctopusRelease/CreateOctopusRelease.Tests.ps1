@@ -227,13 +227,6 @@ Describe "Create Octopus Release" {
 			It "invokes Octo.exe with a project and version" {
 				Assert-VerifiableMocks
 			}
-			It "writes a build summary file" {
-				$buildSummaryFile = Get-ChildItem -Path TestDrive:\ -Filter "Octopus Deploy.md"
-				$buildSummaryFile.FullName | Should Contain "Octopus Deploy"
-				$buildSummaryFile.FullName | Should Contain "Company.Product.Project"
-				$buildSummaryFile.FullName | Should Contain "1.0.0"
-				$buildSummaryFile.FullName | Should ContainExactly "http://dummyoctopusurl/app#/projects/company.product.project/releases/1.0.0"
-			}
 		}
         
         Context "Channel support" {
