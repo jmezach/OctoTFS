@@ -1,7 +1,7 @@
 ﻿{
     "id": "5e91f8d5-8f26-4de5-8504-cd39459b76bc",
-    "name": "OctopusCreateRelease",
-    "friendlyName": "Create Octopus Release",
+    "name": "OctopusCreateReleaseLegacy",
+    "friendlyName": "Create Octopus Release (Deprecated)",
     "description": "Create a Release in Octopus Deploy",
     "category": "Deploy",
     "visibility": [
@@ -12,7 +12,7 @@
     "version": {
         "Major": 0,
         "Minor": 6,
-        "Patch": 2
+        "Patch": 3
     },
     "deprecated": true,
     "minimumAgentVersion": "1.82.0",
